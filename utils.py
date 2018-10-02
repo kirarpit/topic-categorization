@@ -9,6 +9,7 @@ import os, csv
 from scipy import sparse
 import numpy as np
 from collections import Counter
+import matplotlib.pyplot as plt
 
 """
 Returns the sparse version if it exists
@@ -34,6 +35,12 @@ def get_sparse_matrix(filename):
 
     return sparse.csr_matrix(lines)
 
+"""
+Calculates the number of times a word has
+appeared in a category and creates a matrix
+of k X V where k is # unique categories and
+V is #vocabulary
+"""
 def preprocess_data(data):
     labels = data[:, -1].toarray()
     data = data[:, list(range(1, data.shape[1]-1))]
@@ -49,7 +56,29 @@ def preprocess_data(data):
     
     return sparse.csr_matrix(data_list).toarray(), label_dist
 
+"""
+Splits the data into training and validation set
+according to the training set percentage
+"""
 def split_data(data, percent):
     t_rows = list(np.random.choice(data.shape[0], int(data.shape[0] * percent), replace=False))
     v_rows = list(set(list(range(data.shape[0])))^set(t_rows))
     return data[t_rows, :], data[v_rows, :]
+
+def plot(Xs, Ys):
+    fig = plt.figure()
+    plt.plot(Xs, Ys)
+    plt.ylabel('% Accuracy')
+    plt.xlabel('Log(beta)')
+    plt.savefig("accuracy-beta.png")
+    plt.close(fig)
+    
+def save_preds(data, filename):
+    f = open(filename,'w')
+    f.write("id,class\n")
+    
+    idx = 12001
+    for i in range(len(data)):
+        f.write(str(idx) + "," + str(data[i]) + "\n")
+        idx += 1
+    f.close()
