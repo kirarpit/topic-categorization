@@ -8,9 +8,7 @@ Created on Sun Sep 30 22:29:27 2018
 import os, csv
 from scipy import sparse
 import numpy as np
-from collections import Counter
 import matplotlib.pyplot as plt
-import pickle
 
 """
 Returns the sparse version if it exists
@@ -35,27 +33,6 @@ def get_sparse_matrix(filename):
         lines.append(list(map(int, line)))
 
     return sparse.csr_matrix(lines)
-
-"""
-Calculates the number of times a word has
-appeared in a category and creates a matrix
-of k X V where k is # unique categories and
-V is #vocabulary
-"""
-def preprocess_data(data):
-    labels = data[:, -1].toarray()
-    data = data[:, 1:-1]
-    
-    data_list = []
-    for label in np.unique(labels):
-        rows = np.where(labels == label)[0]
-        data_list.append(data[rows].sum(0).tolist()[0])
-    
-    label_dist = Counter(list(labels.T[0]))
-    label_dist = np.array(sorted(label_dist.items()))[:, 1]
-    label_dist = label_dist.reshape(len(label_dist), 1)
-    
-    return sparse.csr_matrix(data_list).toarray(), label_dist
 
 """
 Splits the data into training and validation set
