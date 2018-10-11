@@ -17,7 +17,7 @@ class NaiveBayes:
     and another matrix for P(Yk)
     """
     def train(self, xi_cnt_in_yk, label_dist):
-        total_words_in_yk = xi_cnt_in_yk.sum(1).reshape(label_dist.shape[0], 1) #shape (20, 1)
+        total_words_in_yk = xi_cnt_in_yk.sum(1, keepdims=True) #shape (20, 1)
         denominator = total_words_in_yk + (self.alpha - 1) * self.vocab_len #shape (20, 1)
         
         self.prob_xi_given_yk = (xi_cnt_in_yk + (self.alpha - 1)) / denominator #shape (20, vocab_len)

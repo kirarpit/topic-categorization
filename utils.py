@@ -10,6 +10,7 @@ from scipy import sparse
 import numpy as np
 from collections import Counter
 import matplotlib.pyplot as plt
+import pickle
 
 """
 Returns the sparse version if it exists
@@ -43,7 +44,7 @@ V is #vocabulary
 """
 def preprocess_data(data):
     labels = data[:, -1].toarray()
-    data = data[:, list(range(1, data.shape[1]-1))]
+    data = data[:, 1:-1]
     
     data_list = []
     for label in np.unique(labels):
