@@ -12,7 +12,15 @@ from sklearn.decomposition import TruncatedSVD
 from utils import split_data
 import time
 
+"""
+Multinomial Logistic Regression
+"""
 class LogisticRegression:
+    """
+    Takes in the raw_training_data, with additional options
+    for data transformation like standardisation,
+    normalization or PCA with SVD
+    """
     def __init__(self, raw_training_data, std=True, norm=True, svd=True):
         self.std = std
         self.norm = norm
@@ -25,6 +33,9 @@ class LogisticRegression:
         self.W = sparse.csr_matrix(np.random.rand(self.k, self.n + 1))
         print("W shape", self.W.shape)
 
+    """
+    Trains to get optimal values of the weights
+    """
     def train(self, eq=None, lr=0.01, iterations=1, lamda=0.001):
         for step in range(iterations):
             tic = time.time()
@@ -63,6 +74,10 @@ class LogisticRegression:
         accuracy = sum([1 if labels[i]==preds[i] else 0 for i in range(len(labels))])/len(labels)
         print("Validation Set Accuracy:", accuracy)
         
+    """
+    Pre processes the data;
+    Transforms the data by scaling and adding bias columns
+    """
     def preprocess_data(self, raw_training_data):
         X, X_valid = split_data(raw_training_data, 0.90)
         
@@ -71,11 +86,11 @@ class LogisticRegression:
         X = X[:, 1:-1]
         X_valid = X_valid[:, 1:-1]
         
-        self.k = len(np.unique(self.Y.toarray()))
+        self.k = len(np.unique(self.Y.toarray())) #Number of unique classes
 
         X = self.transformData(X, fit=True)
         X_valid = self.transformData(X_valid)
-        self.n = X.shape[1]
+        self.n = X.shape[1] #Number of features/columns/words
 
         self.X = self.addBiasColumn(X)
         self.X_valid = self.addBiasColumn(X_valid)

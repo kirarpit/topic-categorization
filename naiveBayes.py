@@ -44,6 +44,7 @@ class NaiveBayes:
         labels = data[:, -1].toarray()
         data = data[:, 1:-1]
         
+        #separates the data class wise
         data_list = []
         for label in np.unique(labels):
             rows = np.where(labels == label)[0]

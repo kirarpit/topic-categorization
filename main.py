@@ -12,11 +12,11 @@ import math
 
 raw_data = load_data('training.csv')
 
-####################################################
+"""
 # Trains Naive Bayes on whole training data
 # and makes the prediction on testing data for
 # a chosen value of Beta.
-####################################################
+"""
 NB = NaiveBayes(raw_data)
 
 lgx = -2.0
@@ -25,16 +25,16 @@ NB.set_beta(beta)
 NB.train()
 
 raw_testing_data = load_data('testing.csv')
-rows = raw_testing_data[:, 1:].toarray()
+rows = raw_testing_data[:, 1:].toarray() #removes 1st column
 preds = list(NB.predict(rows))
 save_preds(preds, "prediction.csv")
 
-####################################################
+"""
 # Trains Naive Bayes on 85% of the training data.
 # Rest of the data is held for validation.
 # Trains for different values of Beta and plots
 # accuracy vs log(beta).
-####################################################
+"""
 raw_training_data, raw_validation_data = split_data(raw_data, 0.85)
 
 #Training on training_data set
