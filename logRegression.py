@@ -9,6 +9,7 @@ import numpy as np
 from scipy import sparse
 from sklearn.preprocessing import Normalizer, StandardScaler
 from sklearn.decomposition import TruncatedSVD
+from sklearn.feature_selection import VarianceThreshold
 from utils import split_data
 import time
 
@@ -21,16 +22,19 @@ class LogisticRegression:
     for data transformation like standardisation,
     normalization or PCA with SVD
     """
-    def __init__(self, raw_training_data, std=True, norm=True, svd=True):
+    def __init__(self, raw_training_data, var_red=True, std=True, norm=True, svd=True, split=1.0):
+        self.var_red = var_red
+        self.split = split
         self.std = std
         self.norm = norm
         self.svd = svd
-        self.truncSVD = TruncatedSVD(n_components=500)
+        self.truncSVD = TruncatedSVD(n_components=1000)
         self.stdScaler = StandardScaler(with_mean=False)
-        
+        self.sel = VarianceThreshold()
+
         self.preprocess_data(raw_training_data)
         self.getDeltaMatrix()
-        self.W = sparse.csr_matrix(np.random.rand(self.k, self.n + 1))
+        self.W = sparse.csr_matrix(np.random.rand(self.k, self.n))
         print("W shape", self.W.shape)
 
     """
@@ -50,7 +54,7 @@ class LogisticRegression:
             print("Learning Rate:", lr)
             
             self.W += lr * (error.dot(self.X) - lamda*self.W)
-            self.checkAccuracy()
+            if self.split < 1: self.checkAccuracy()
             print("Time taken:", time.time() - tic)
     
     def getProbs(self, X=None):
@@ -79,7 +83,7 @@ class LogisticRegression:
     Transforms the data by scaling and adding bias columns
     """
     def preprocess_data(self, raw_training_data):
-        X, X_valid = split_data(raw_training_data, 0.90)
+        X, X_valid = split_data(raw_training_data, self.split)
         
         self.Y = X[:, -1]
         self.Y_valid = X_valid[:, -1]
@@ -88,13 +92,10 @@ class LogisticRegression:
         
         self.k = len(np.unique(self.Y.toarray())) #Number of unique classes
 
-        X = self.transformData(X, fit=True)
-        X_valid = self.transformData(X_valid)
-        self.n = X.shape[1] #Number of features/columns/words
+        self.X = self.transformData(X, fit=True)
+        self.X_valid = self.transformData(X_valid)
+        self.n = self.X.shape[1] #Number of features/columns/words
 
-        self.X = self.addBiasColumn(X)
-        self.X_valid = self.addBiasColumn(X_valid)
-        
         print("X shape", self.X.shape)
         print("Y shape", self.Y.shape)
         print("X_valid shape", self.X_valid.shape)
@@ -103,9 +104,18 @@ class LogisticRegression:
     def preprocess_testing_data(self, raw_data):
         X_test = raw_data[:, 1:]
         X_test = self.transformData(X_test)
-        return self.addBiasColumn(X_test)
+        return X_test
 
     def transformData(self, data, fit=False):
+        #return if empty
+        if data.shape[0] == 0:
+            return data
+        
+        # Feature Selection(Removing features with 0 variance)
+        if self.var_red:
+            if fit: self.sel.fit(data)
+            data = self.sel.transform(data)
+        
         #SVD
         if self.svd:
             if fit: self.truncSVD.fit(data)
@@ -121,12 +131,12 @@ class LogisticRegression:
             if fit: self.X_normalizer = Normalizer(norm='l1').fit(data)
             data = sparse.csr_matrix(self.X_normalizer.transform(data))
         
+        #Add bias column
+        bias_column = sparse.csr_matrix(np.ones((data.shape[0], 1)))
+        data = sparse.csr_matrix(sparse.hstack([bias_column, data]))
+
         return data
     
-    def addBiasColumn(self, data):
-        bias_column = sparse.csr_matrix(np.ones((data.shape[0], 1)))
-        return sparse.csr_matrix(sparse.hstack([bias_column, data]))
-
     def getDeltaMatrix(self):
         self.D = np.repeat(self.Y.toarray().T, self.k, 0)
         for i in range(1, self.k + 1):
@@ -134,7 +144,7 @@ class LogisticRegression:
             r[r != i] = 0
             r[r == i] = 1
 
-        print("D shape", self.D.shape)        
+        print("D shape", self.D.shape)   
         
     def load_weights(self):
         self.W = sparse.load_npz("weights.npz")
