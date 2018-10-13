@@ -16,9 +16,9 @@ raw_data = load_data('training.csv')
 # and makes the prediction on testing data for
 # a chosen value of Beta.
 """
-NB = NaiveBayes(raw_data, var_red=True)
+NB = NaiveBayes(raw_data, var_red=True, split=0.85)
 
-lgx = -1
+lgx = -2
 beta = math.pow(10, lgx)
 NB.train(beta)
 
@@ -40,7 +40,7 @@ lgx = -5
 while lgx <= 0:
     beta = math.pow(10, lgx)
     NB.train(beta)
-    accuracy = NB.check_accuracy() #Checking accuracy on validation set
+    accuracy = NB.get_accuracy() #Checking accuracy on validation set
     
     Xs.append(lgx)
     Ys.append(accuracy)

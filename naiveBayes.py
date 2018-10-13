@@ -15,7 +15,7 @@ class NaiveBayes:
     def __init__(self, data, split=1.0, var_red=True):
         self.split = split
         self.var_red = var_red
-        self.sel = VarianceThreshold()
+        self.sel = VarianceThreshold(threshold=1.8e-7)
 
         self.preprocess_data(data)
         self.vocab_len = self.xi_cnt_in_yk.shape[1]
@@ -48,9 +48,11 @@ class NaiveBayes:
         preds = self.predict(self.X_valid)
         labels = self.Y_valid[:, 0]
         accuracy = sum([1 if labels[i]==preds[i] else 0 for i in range(len(labels))])/len(labels)
+        self.acc = accuracy
         print("Validation Set Accuracy:", accuracy)
-        
-        return accuracy
+    
+    def get_accuracy(self):
+        return self.acc
     
     """
     Calculates the number of times a word has
@@ -72,6 +74,7 @@ class NaiveBayes:
         if self.var_red:
             X = self.sel.fit_transform(X)
             if X_valid.shape[0] > 0: X_valid = self.sel.transform(X_valid)
+            print("Reduced shape:", X.shape)
             
         self.X_valid = X_valid.toarray()
         
