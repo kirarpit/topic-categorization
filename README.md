@@ -1,7 +1,7 @@
 # Topic Categorization with Naive Bayes and Multinomial Logistic Regression
 
 ## About
-- This is a very basic implementation of Naive Bayes and Multinomial Logistic Regression from scratch.
+- This is python implementation of Naive Bayes and Multinomial Logistic Regression from scratch.
 - The goal here is to predict which newsgroup a given document belongs to. Check 'Problem Description' for more info.
 - Sparse matrices are heavily used since only a handful number of words out of complete vocabulary(of ~61k words) appear in a given document.
 

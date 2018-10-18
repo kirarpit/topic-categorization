@@ -35,6 +35,8 @@ class LogisticRegression:
         self.preprocess_data(raw_training_data)
         self.getDeltaMatrix()
         self.W = sparse.csr_matrix(np.random.rand(self.k, self.n))
+        
+        self.accuracy_data = []
         print("W shape", self.W.shape)
 
     """
@@ -54,7 +56,10 @@ class LogisticRegression:
             print("Learning Rate:", lr)
             
             self.W += lr * (error.dot(self.X) - lamda*self.W)
-            if self.split < 1: self.checkAccuracy()
+            if self.split < 1 and step % 10 == 0:
+                acc = self.checkAccuracy()
+                self.accuracy_data.append((step, acc))
+            
             print("Time taken:", time.time() - tic)
     
     def getProbs(self, X=None):
@@ -77,7 +82,11 @@ class LogisticRegression:
         labels = self.Y_valid.toarray()[:, 0]
         accuracy = sum([1 if labels[i]==preds[i] else 0 for i in range(len(labels))])/len(labels)
         print("Validation Set Accuracy:", accuracy)
-        
+        return accuracy
+    
+    def getAccData(self):
+        return self.accuracy_data
+    
     """
     Pre processes the data;
     Transforms the data by scaling and adding bias columns

@@ -13,8 +13,8 @@ from utils import split_data
 
 class NaiveBayes:
     def __init__(self, data, split=1.0, var_red=True):
-        self.split = split
-        self.var_red = var_red
+        self.split = split #split percentage on which training and validation sets would be separated
+        self.var_red = var_red #variance reduction boolean
         self.sel = VarianceThreshold(threshold=1.8e-7)
 
         self.preprocess_data(data)
@@ -47,9 +47,21 @@ class NaiveBayes:
     def check_accuracy(self):
         preds = self.predict(self.X_valid)
         labels = self.Y_valid[:, 0]
+        
         accuracy = sum([1 if labels[i]==preds[i] else 0 for i in range(len(labels))])/len(labels)
         self.acc = accuracy
         print("Validation Set Accuracy:", accuracy)
+    
+    def getConfMatrix(self):
+        preds = self.predict(self.X_valid)
+        labels = self.Y_valid[:, 0]
+        
+        matrix = np.zeros((len(self.prob_yk), len(self.prob_yk)))
+        for i in range(len(labels)):
+            if labels[i] != preds[i]:
+                matrix[labels[i]-1][preds[i]-1] += 1
+        
+        return matrix
     
     def get_accuracy(self):
         return self.acc
@@ -72,6 +84,7 @@ class NaiveBayes:
         X_valid = X_valid[:, 1:-1]
         
         if self.var_red:
+            print("Fitting and transforming data of shape:", X.shape)
             X = self.sel.fit_transform(X)
             if X_valid.shape[0] > 0: X_valid = self.sel.transform(X_valid)
             print("Reduced shape:", X.shape)
@@ -93,7 +106,12 @@ class NaiveBayes:
     
     def preprocess_testing_data(self, data):
         data = data[:, 1:].toarray() #removes 1st column
-        if self.var_red: data = self.sel.transform(data)
+        
+        if self.var_red:
+            print("Transforming data of shape:", data.shape)
+            data = self.sel.transform(data)
+            print("Reduced shape:", data.shape)
+            
         return data
         
     def set_beta(self, beta):
