@@ -1,5 +1,5 @@
 # Topic Categorization with Naive Bayes and Multinomial Logistic Regression
-
+## Update: [Obtained highest accuracy!](https://www.kaggle.com/c/project-2-topic-categorization-cs529-2018/leaderboard)
 ## About
 - This is python implementation of Naive Bayes and Multinomial Logistic Regression from scratch.
 - The goal here is to predict which newsgroup a given document belongs to. Check 'Problem Description' for more info.
